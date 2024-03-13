@@ -4,4 +4,4 @@
 
 👩‍💻Matias Vilches Bru
 👩‍💻Bruno Romero
-👩‍💻Jose Ruti
+
