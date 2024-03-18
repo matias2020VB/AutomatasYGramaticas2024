@@ -1,9 +1,9 @@
-- Automatas  Y  Gramaticas  2024
+- Automatas  y Gramáticas  2024
 
 - Integrantes:
 
-👩‍💻
-Matias Vilches Bru
-👩‍💻
-Bruno Romero
+  👩‍💻
+  Matias Vilches Bru
+  👩‍💻
+  Bruno Romero
 
