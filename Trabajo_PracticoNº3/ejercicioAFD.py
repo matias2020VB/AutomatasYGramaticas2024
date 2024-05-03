@@ -1,54 +1,65 @@
 class Automata():
-    def __init__(self, text):
-        self.__text = text
-        self.afd = {
-            'q0': {'a': 'q1', 'b': 'q0'},  # Transiciones desde el estado q0
-            'q1': {'a': 'q2', 'b': 'q1'},  # Transiciones desde el estado q1
-            'q2': {'a': 'q2', 'b': 'q2'}   # Transiciones desde el estado q2
-        }
+    def __init__(self, texto):
+        self.__texto = texto  # Inicializa el autómata con un texto de entrada
 
-    def table(self):
-        print('|--------|----------------------|\n|        |  Simbolo de entrada  |\n| Estado |-----------|----------|\n|        |     a     |     b    |')
+    def tabla(self):
+        # Imprime la tabla de transiciones del autómata
+        print('|--------|----------------------|\n|        |  Símbolo de entrada  |\n| Estado |-----------|----------|\n|        |     a     |     b    |')
         print('|--------|-----------|----------|\n|  Q0    |    Q1     |    Q2    |\n|  Q1    |    Q1     |    Q2    |\n|  Q2    |    Q1     |    Q2    |')
         print('|--------|-----------|----------|')
 
     def secuencias(self):
-        aceptacion = ['q2']
-        estado_actual = 'q0'
-        print('Estado:', estado_actual)
-        for caracter in self.__text:
-            if caracter in self.afd[estado_actual]:
-                print('Caracter:', caracter)
-                estado_siguiente = self.afd[estado_actual][caracter]
-                print(f'Transición de {estado_actual} a {estado_siguiente}')
-                estado_actual = estado_siguiente
-            else:
-                print(f'Caracter no válido: {caracter}')
-                print('La cadena NO es aceptada por el autómata.\n')
-                return True
-            print('Estado:', estado_actual)
+        aceptacion = ['Q1','Q2']  # Define los estados de aceptación
+        estado_actual = 'Q0'  # Establece el estado inicial
+        print('Estado:', estado_actual)  # Imprime el estado actual
+        for i in range(len(self.__texto)):
+            if estado_actual == 'Q0':
+                print('Carácter:', self.__texto[i])  # Imprime el carácter actual
+                if self.__texto[i] == 'a':
+                    print('Transición de Q0 a Q1')  # Imprime la transición
+                    estado_actual = 'Q1'  # Actualiza el estado actual
+                if self.__texto[i] == 'b':
+                    print('Transición de Q0 a Q2')  
+                    estado_actual = 'Q2'  
+                elif estado_actual == 'Q1':
+                    print('Carácter:', self.__texto[i])  
+                    if self.__texto[i] == 'a':
+                        print('Transición de Q1 a Q1')  
+                        estado_actual = 'Q1'  
+                    if self.__texto[i] == 'b':
+                        print('Transición de Q1 a Q2')  
+                        estado_actual = 'Q2'  
+            elif estado_actual == 'Q2':
+                print('Carácter:', self.__texto[i])  
+                if self.__texto[i] == 'a':
+                    print('Transición de Q2 a Q1')  
+                    estado_actual = 'Q1'  
+                if self.__texto[i] == 'b':
+                    print('Transición de Q2 a Q2')  
+                    estado_actual = 'Q2'  
+            print('Estado:', estado_actual)  # Imprime el estado actual después de cada transición
 
         if estado_actual in aceptacion:
-            print("La cadena SI es aceptada por el autómata.")
+            print('ESTADO DE ACEPTACIÓN ALCANZADO')  # Imprime si el estado de aceptación se alcanza
             return False
         else:
-            print('La cadena NO es aceptada por el autómata.\n')
+            print('NO SE ALCANZA UN ESTADO DE ACEPTACIÓN. CADENA NO VÁLIDA.\n')  # Imprime si no se alcanza un estado de aceptación
             return True
 
     def validacion(self):
-        validos = {'a', 'b'}
-        invalidos = [caracter for caracter in self.__text if caracter not in validos]
-        if invalidos:
-            print('Caracteres inválidos:', invalidos)
-            return False
+        validos = ['a', 'b']  # Define los caracteres válidos
+        for i in range(len(self.__texto)):
+            if self.__texto[i] not in validos:
+                print('CARÁCTER INVÁLIDO:', self.__texto[i])  # Imprime caracteres inválidos
+                return False
         return True
 
 def main():
-    text = input("Ingrese la cadena a evaluar: ")
-    AFD = Automata(text)
-    AFD.table()
-    AFD.secuencias()
-    AFD.validacion()
+    texto = input("INTRODUCIR CARÁCTER:")  
+    AFD = Automata(texto)  # Crea un objeto de la clase Automata con el texto proporcionado
+    AFD.tabla()  # Imprime la tabla de transiciones del autómata
+    AFD.secuencias()  # Ejecuta la simulación de secuencias en el autómata
+    AFD.validacion()  # Valida si el texto contiene caracteres válidos
 
 if __name__ == "__main__":
-    main()
+    main()  
