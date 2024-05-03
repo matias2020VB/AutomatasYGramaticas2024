@@ -7,3 +7,4 @@
   👩‍💻
   Bruno Romero
 
+- Este repositorio tiene como finalidad subir todos los ejercicios de los trabajos prácticos propuestos durante el cursado de la materia.
