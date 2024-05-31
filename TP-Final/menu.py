@@ -1,4 +1,4 @@
-from music_manager import search_song_by_title_or_artist, load_songs, format_duration, mostrar_informacion_artista
+from music_manager import search_song_by_title_or_artist, load_songs, format_duration, mostrar_informacion_artista, insertar_registro_manualmente, insertar_registros_desde_csv, escribir_csv
 
 
 def menu():
@@ -33,8 +33,22 @@ def menu():
             pass
 
         elif choice == '3':
-            
-            pass
+            print("1. Insertar un registro manualmente")
+            print("2. Insertar registros desde un archivo CSV")
+            sub_choice = input("Seleccione una opción: ")
+            if sub_choice == '1':
+                registro = insertar_registro_manualmente()
+                songs.append(registro)
+                escribir_csv(file_path, songs)  # Guardar los registros en el archivo CSV
+                print("Registro insertado correctamente.")
+            elif sub_choice == '2':
+                nuevos_registros = insertar_registros_desde_csv()
+                songs.extend(nuevos_registros)
+                escribir_csv(file_path, songs)  # Guardar los registros en el archivo CSV
+                print("Registros insertados correctamente.")
+            else:
+                print("Opción no válida.")
+
 
         elif choice == '4':
             artista = input("Nombre del artista: ")

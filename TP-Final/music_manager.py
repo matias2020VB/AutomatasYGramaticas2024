@@ -1,6 +1,6 @@
 import csv
 from datetime import timedelta
-
+import re
 
 def load_songs(file_path):
     songs = []
@@ -75,3 +75,76 @@ def mostrar_informacion_artista(artista, registros):
         print(f"Álbum: {album}")
         print(f"  Canciones: {info['canciones']}")
         print(f"  Duración total: {duracion_total_minutos} minutos y {duracion_total_segundos} segundos")
+
+
+
+
+def validar_uri_spotify(uri):
+    """Valida la URI de Spotify usando una expresión regular."""
+    regex = r"^spotify:[a-zA-Z0-9:]+$"
+    return re.match(regex, uri) is not None
+
+def convertir_a_milisegundos(duracion):
+    """Convierte una duración en formato 'mm:ss' a milisegundos."""
+    minutos, segundos = map(int, duracion.split(':'))
+    return (minutos * 60 + segundos) * 1000
+
+def validar_likes_views(likes, views):
+    """Valida que el número de likes no sea mayor que el de views."""
+    return likes <= views
+
+def leer_csv(archivo):
+    """Lee un archivo CSV y devuelve una lista de registros."""
+    registros = []
+    with open(archivo, newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            registros.append(row)
+    return registros
+
+def escribir_csv(archivo, registros):
+    """Escribe una lista de registros a un archivo CSV."""
+    campos = ['artista', 'track', 'album', 'uri_spotify', 'duracion', 'url_spotify', 'url_youtube', 'likes', 'views']
+    with open(archivo, 'w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=campos)
+        writer.writeheader()
+        for registro in registros:
+            writer.writerow(registro)
+
+def insertar_registro_manualmente():
+    """Solicita al usuario los detalles de un registro y lo devuelve como un diccionario."""
+    artista = input("Artista: ")
+    track = input("Track: ")
+    album = input("Album: ")
+    uri_spotify = input("URI de Spotify: ")
+    while not validar_uri_spotify(uri_spotify):
+        print("URI de Spotify no válida. Debe seguir el formato 'spotify:tipo:identificador'.")
+        uri_spotify = input("URI de Spotify: ")
+
+    duracion = input("Duración (mm:ss): ")
+    duracion_ms = convertir_a_milisegundos(duracion)
+    url_spotify = input("URL de Spotify: ")
+    url_youtube = input("URL de YouTube: ")
+    likes = int(input("Likes: "))
+    views = int(input("Views: "))
+    while not validar_likes_views(likes, views):
+        print("El número de likes no puede ser mayor que el de views.")
+        likes = int(input("Likes: "))
+        views = int(input("Views: "))
+
+    return {
+        'artista': artista,
+        'track': track,
+        'album': album,
+        'uri_spotify': uri_spotify,
+        'duracion': duracion_ms,
+        'url_spotify': url_spotify,
+        'url_youtube': url_youtube,
+        'likes': likes,
+        'views': views
+    }
+
+def insertar_registros_desde_csv():
+    """Solicita al usuario el nombre de un archivo CSV y devuelve una lista de registros."""
+    archivo = input("Nombre del archivo CSV: ")
+    return leer_csv(archivo)
