@@ -2,7 +2,6 @@ import csv
 from datetime import timedelta
 
 
-
 def load_songs(file_path):
     songs = []
     try:
@@ -43,3 +42,29 @@ def format_duration(ms):
     except ValueError:
         return "Formato de duración inválido"
 
+
+
+def mostrar_informacion_artista(artista, registros):
+    """Muestra la cantidad de álbumes, nombres de álbumes, cantidad de canciones y duración total por álbum de un artista."""
+    albums = {}
+    for registro in registros:
+        if registro['Artist'].lower() == artista.lower():
+            album = registro['Album']
+            duracion = int(float(registro['Duration_ms']))  # Convertir a float y luego a int
+            if album not in albums:
+                albums[album] = {'canciones': 0, 'duracion_total': 0}
+            albums[album]['canciones'] += 1
+            albums[album]['duracion_total'] += duracion
+
+    if not albums:
+        print(f"No se encontraron álbumes para el artista '{artista}'.")
+        return
+
+    print(f"Artista: {artista}")
+    print(f"Cantidad de álbumes: {len(albums)}")
+    for album, info in albums.items():
+        duracion_total_minutos = info['duracion_total'] // 60000
+        duracion_total_segundos = (info['duracion_total'] % 60000) // 1000
+        print(f"Álbum: {album}")
+        print(f"  Canciones: {info['canciones']}")
+        print(f"  Duración total: {duracion_total_minutos} minutos y {duracion_total_segundos} segundos")

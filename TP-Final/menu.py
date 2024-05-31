@@ -1,11 +1,10 @@
-from music_manager import search_song_by_title_or_artist, load_songs, format_duration
+from music_manager import search_song_by_title_or_artist, load_songs, format_duration, mostrar_informacion_artista
 
 
 def menu():
-    # Ruta del archivo music.csv
     file_path = 'spotify_and_youtube 2024.csv'
     songs = load_songs(file_path)
-    
+
     while True:
         print("\n--- MENÚ ---")
         print("1 - Buscar por título o artista")
@@ -28,6 +27,18 @@ def menu():
                     print(f"Artista: {artist}, Título: {track}, Duración: {duration}")
             else:
                 print("No se encontraron resultados.")
+
+        elif choice == '2':
+            
+            pass
+
+        elif choice == '3':
+            
+            pass
+
+        elif choice == '4':
+            artista = input("Nombre del artista: ")
+            mostrar_informacion_artista(artista, songs)
 
         elif choice == '5':
             print("¡Adiós!")
