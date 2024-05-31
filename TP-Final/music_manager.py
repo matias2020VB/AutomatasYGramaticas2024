@@ -46,11 +46,12 @@ def format_duration(ms):
 
 def mostrar_informacion_artista(artista, registros):
     """Muestra la cantidad de álbumes, nombres de álbumes, cantidad de canciones y duración total por álbum de un artista."""
-    albums = {}
+    albums = {} # Diccionario para almacenar información de los álbumes
+    
     for registro in registros:
-        if registro['Artist'].lower() == artista.lower():
+        if registro['Artist'].lower() == artista.lower():  # Comparar artista en minúsculas
             album = registro['Album']
-            duracion = int(float(registro['Duration_ms']))  # Convertir a float y luego a int
+            duracion = int(float(registro['Duration_ms']))  # Convertir duración a milisegundos
             if album not in albums:
                 albums[album] = {'canciones': 0, 'duracion_total': 0}
             albums[album]['canciones'] += 1
@@ -60,11 +61,17 @@ def mostrar_informacion_artista(artista, registros):
         print(f"No se encontraron álbumes para el artista '{artista}'.")
         return
 
+   
     print(f"Artista: {artista}")
+
     print(f"Cantidad de álbumes: {len(albums)}")
+    
     for album, info in albums.items():
+    # Calcular la duración total del álbum en minutos y segundos
         duracion_total_minutos = info['duracion_total'] // 60000
         duracion_total_segundos = (info['duracion_total'] % 60000) // 1000
+        
+        # Imprimir información del álbum
         print(f"Álbum: {album}")
         print(f"  Canciones: {info['canciones']}")
         print(f"  Duración total: {duracion_total_minutos} minutos y {duracion_total_segundos} segundos")
