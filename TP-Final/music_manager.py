@@ -1,6 +1,7 @@
 import csv
 from datetime import timedelta
 import re
+from collections import defaultdict
 
 def load_songs(file_path):
     songs = []
@@ -148,3 +149,34 @@ def insertar_registros_desde_csv():
     """Solicita al usuario el nombre de un archivo CSV y devuelve una lista de registros."""
     archivo = input("Nombre del archivo CSV: ")
     return leer_csv(archivo)
+
+
+# Punto 2 Funcion para mostrar los 10 temas con mayor reproducciones de un artista.
+
+def list_top_artists_by_views():
+    csv_file = 'Listado_temas_2023.csv'
+
+    try:
+        with open(csv_file, 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            artist_views = defaultdict(float)
+
+            for song in reader:
+                artist = song.get('Artist', 'Unknown')
+                views_str = song.get('Views', '0')
+                views = float(views_str) if views_str else 0.0
+                artist_views[artist] += views
+
+            sorted_artists = sorted(artist_views.items(), key=lambda x: x[1], reverse=True)
+
+            print("\nTop 10 artists by total views:")
+            for i, (artist, views) in enumerate(sorted_artists[:10], start=1):
+                print(f"{i}. Artist: {artist}, Total Views: {views}")
+            input("Presiona una tecla para continuar...")
+
+    except FileNotFoundError:
+        print(f"El archivo {csv_file} no fue encontrado.")
+        input("Presiona una tecla para continuar...")
+    except Exception as e:
+        print(f"Ha ocurrido un error: {e}")
+        input("Presiona una tecla para continuar...")

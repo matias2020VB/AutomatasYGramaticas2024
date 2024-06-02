@@ -1,4 +1,4 @@
-from music_manager import search_song_by_title_or_artist, load_songs, format_duration, mostrar_informacion_artista, insertar_registro_manualmente, insertar_registros_desde_csv, escribir_csv
+from music_manager import search_song_by_title_or_artist, load_songs, format_duration, mostrar_informacion_artista, insertar_registro_manualmente, insertar_registros_desde_csv, escribir_csv, list_top_artists_by_views
 
 
 def menu():
@@ -29,7 +29,7 @@ def menu():
                 print("No se encontraron resultados.")
 
         elif choice == '2':
-            
+            list_top_artists_by_views
             pass
 
         elif choice == '3':
