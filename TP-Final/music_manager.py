@@ -2,6 +2,8 @@ import csv  # Importar módulo para manejo de archivos CSV
 import re  # Importar módulo para expresiones regulares
 from datetime import timedelta  # Importar timedelta para manejo de duraciones
 
+
+
 # Punto 1: Cargar canciones desde un archivo CSV
 def load_songs(file_path):
     songs = []  # Lista para almacenar las canciones
@@ -44,34 +46,7 @@ def format_duration(ms):
     except ValueError:  # Manejar error de conversión
         return "00:00:00"
 
-# Punto 4: Mostrar información de un artista
-def mostrar_informacion_artista(artista, registros):
-    """Muestra la cantidad de álbumes, nombres de álbumes, cantidad de canciones y duración total por álbum de un artista."""
-    albums = {}  # Diccionario para almacenar información de los álbumes
-    
-    for registro in registros:  # Iterar sobre cada registro
-        if registro['Artist'].lower() == artista.lower():  # Comparar artista en minúsculas
-            album = registro['Album']  # Obtener el nombre del álbum
-            duracion = int(float(registro['Duration_ms']))  # Convertir duración a milisegundos
-            if album not in albums:  # Si el álbum no está en el diccionario
-                albums[album] = {'canciones': 0, 'duracion_total': 0}  # Inicializar entrada para el álbum
-            albums[album]['canciones'] += 1  # Incrementar contador de canciones
-            albums[album]['duracion_total'] += duracion  # Sumar duración total
 
-    if not albums:  # Si no se encontraron álbumes
-        print(f"No se encontraron álbumes para el artista '{artista}'.")
-        return
-
-    print(f"Artista: {artista}")  # Mostrar nombre del artista
-    print(f"Cantidad de álbumes: {len(albums)}")  # Mostrar cantidad de álbumes
-    
-    for album, info in albums.items():  # Iterar sobre cada álbum y su información
-        duracion_total_minutos = info['duracion_total'] // 60000  # Calcular minutos totales
-        duracion_total_segundos = (info['duracion_total'] % 60000) // 1000  # Calcular segundos restantes
-        
-        print(f"Álbum: {album}")  # Mostrar nombre del álbum
-        print(f"  Canciones: {info['canciones']}")  # Mostrar cantidad de canciones
-        print(f"  Duración total: {duracion_total_minutos} minutos y {duracion_total_segundos} segundos")  # Mostrar duración total
 
 # Punto 2: Listar las 10 canciones más reproducidas de un artista
 def list_top_songs_by_artist(songs):
@@ -103,6 +78,10 @@ def list_top_songs_by_artist(songs):
         views = song['views'] / 1_000_000  # Convertir vistas a millones
         print(f"{i}. Artista: {artist}, Tema: {track}, Duración: {duration}, Reproducciones: {views:.2f} millones")  # Mostrar información de la canción
     input("Presiona una tecla para continuar...")  # Pausar la ejecución
+
+
+
+
 
 # Punto 3: Agregar una canción al archivo CSV
 def addsong(file_path):
@@ -223,5 +202,35 @@ def validar_y_concatenar_csv(new_path, file_path_destino):
 
 
 
+# Punto 4: Mostrar información de un artista
+def mostrar_informacion_artista(artista, registros):
+    """Muestra la cantidad de álbumes, nombres de álbumes, cantidad de canciones y duración total por álbum de un artista."""
+    albums = {}  # Diccionario para almacenar información de los álbumes
+    
+    for registro in registros:  # Iterar sobre cada registro
+        if registro['Artist'].lower() == artista.lower():  # Comparar artista en minúsculas
+            album = registro['Album']  # Obtener el nombre del álbum
+            duracion = int(float(registro['Duration_ms']))  # Convertir duración a milisegundos
+            if album not in albums:  # Inicializa un nueva entrada para el album
+                albums[album] = {'canciones': 0, 'duracion_total': 0}  
+            albums[album]['canciones'] += 1  # Incrementar contador de canciones
+            albums[album]['duracion_total'] += duracion  # Sumar duración total de la cancion al album
+
+    if not albums:  # Si no se encontraron álbumes
+        print(f"No se encontraron álbumes para el artista '{artista}'.")
+        return
+
+    print(f"Artista: {artista}")  # Mostrar nombre del artista
+    print(f"Cantidad de álbumes: {len(albums)}")  # Mostrar cantidad de álbumes
+    
+    #Mostrar informacion detallada de cada album
+    for album, info in albums.items():  # Iterar sobre cada álbum y su información
+        duracion_total_minutos = info['duracion_total'] // 60000  # Calcula minutos de la duracion total de cada album
+        duracion_total_segundos = (info['duracion_total'] % 60000) // 1000  # Calcular segundos restantes de la duracion total de cada album
+        
+        print(f"Álbum: {album}")  # Mostrar nombre del álbum
+        print(f"  Canciones: {info['canciones']}")  # Mostrar cantidad de canciones
+        print(f"  Duración total: {duracion_total_minutos} minutos y {duracion_total_segundos} segundos")  # Mostrar duración total
+        print("-" * 50)  
 
 
