@@ -1,5 +1,5 @@
 from music_manager import search_song_by_title_or_artist, load_songs, format_duration, mostrar_informacion_artista, list_top_songs_by_artist, addsong
-
+from music_manager import validar_y_concatenar_csv
 def menu():
     file_path = 'spotify_and_youtube 2024.csv'
     songs = load_songs(file_path)

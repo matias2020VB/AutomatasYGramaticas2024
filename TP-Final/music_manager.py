@@ -166,56 +166,60 @@ def addsong(file_path):
 
 
 
-# def validar_datos_registro(registro):
-#     """Valida los datos de un registro de canción."""
-#     if not re.match(r'^https://open.spotify.com/[a-zA-Z0-9/?=]+$', registro.get('Url_spotify', '')):
-#         return False
-#     if not re.match(r'^\d+$', registro.get('Duration_ms', '')):
-#         return False
-#     if not re.match(r'^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+$', registro.get('Url_youtube', '')):
-#         return False
-#     if int(registro.get('Likes', 0)) > int(registro.get('Views', 0)):
-#         return False
-#     return True
+def validar_y_concatenar_csv(new_path, file_path_destino):
+    """Valida los datos de un archivo CSV y los concatena al archivo destino."""
 
-# def leer_y_validar_csv(file_path):
-#     """Lee un archivo CSV y devuelve los registros válidos."""
-#     registros_validos = []
-#     try:
-#         with open(file_path, mode='r', newline='', encoding='utf-8') as file:
-#             reader = csv.DictReader(file)
-#             for row in reader:
-#                 if validar_datos_registro(row):
-#                     registros_validos.append(row)
-#     except FileNotFoundError:
-#         print(f"El archivo '{file_path}' no fue encontrado.")
-#     except Exception as e:
-#         print(f"Error al leer el archivo: {e}")
-#     return registros_validos
+    def validar_datos_registro(registro):
+        """Valida los datos de un registro de canción."""
+        if not re.match(r'^https://open.spotify.com/[a-zA-Z0-9/?=]+$', registro.get('Url_spotify', '')):
+            print(f"URL de Spotify no válida: {registro.get('Url_spotify', '')}")
+            return False
+        if not re.match(r'^\d+$', registro.get('Duration_ms', '')):
+            print(f"Duración no válida: {registro.get('Duration_ms', '')}")
+            return False
+        if not re.match(r'^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+$', registro.get('Url_youtube', '')):
+            print(f"URL de YouTube no válida: {registro.get('Url_youtube', '')}")
+            return False
+        if int(registro.get('Likes', 0)) > int(registro.get('Views', 0)):
+            print(f"Likes no pueden ser mayores que Views: {registro.get('Likes', 0)} > {registro.get('Views', 0)}")
+            return False
+        return True
 
-# def concatenar_archivo(file_path_origen, file_path_destino):
-#     """Concatena los registros válidos de un archivo CSV al archivo destino."""
-#     registros_validos = leer_y_validar_csv(file_path_origen)
+    def leer_y_validar_csv(new_path):
+        """Lee un archivo CSV y devuelve los registros válidos."""
+        registros_validos = []
+        try:
+            with open(new_path, mode='r', newline='', encoding='utf-8') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    if validar_datos_registro(row):
+                        registros_validos.append(row)
+        except FileNotFoundError:
+            print(f"El archivo '{new_path}' no fue encontrado.")
+        except Exception as e:
+            print(f"Error al leer el archivo: {e}")
+        return registros_validos
+
+    registros_validos = leer_y_validar_csv(new_path)
     
-#     if not registros_validos:
-#         print("No hay registros válidos para concatenar.")
-#         return
+    if not registros_validos:
+        print("No hay registros válidos para concatenar.")
+        return
     
-#     try:
-#         file_exists = False
-#         with open(file_path_destino, mode='r', newline='', encoding='utf-8') as file:
-#             file_exists = True
-#     except FileNotFoundError:
-#         pass
+    try:
+        file_exists = False
+        with open(file_path_destino, mode='r', newline='', encoding='utf-8') as file:
+            file_exists = True
+    except FileNotFoundError:
+        pass
 
-#     with open(file_path_destino, mode='a', newline='', encoding='utf-8') as file:
-#         fieldnames = ["Title", "Artist", "Album", "Url_spotify", "Uri", "Duration_ms", "Url_youtube", "Likes", "Views"]
-#         writer = csv.DictWriter(file, fieldnames=fieldnames)
+    with open(file_path_destino, mode='a', newline='', encoding='utf-8') as file:
+        fieldnames = ["Title", "Artist", "Album", "Url_spotify", "Uri", "Duration_ms", "Url_youtube", "Likes", "Views"]
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
 
-#         if not file_exists:
-#             writer.writeheader()
+        if not file_exists:
+            writer.writeheader()
 
-#         writer.writerows(registros_validos)
+        writer.writerows(registros_validos)
 
-#     print(f"{len(registros_validos)} registros válidos han sido concatenados exitosamente.")
-
+    print(f"{len(registros_validos)} registros válidos han sido concatenados exitosamente.")
