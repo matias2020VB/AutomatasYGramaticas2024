@@ -1,4 +1,4 @@
-from music_manager import search_song_by_title_or_artist, load_songs, format_duration, mostrar_informacion_artista, list_top_songs_by_artist, addsong
+from music_manager import search_song_by_title_or_artist, load_songs, format_duration, mostrar_informacion_artista, list_top_songs_by_artist, addsong, find_last_index
 from music_manager import validar_y_concatenar_csv
 def menu():
     file_path = 'spotify_and_youtube 2024.csv'
@@ -34,16 +34,20 @@ def menu():
         
         
         elif choice == '3':
-             print("Insertar un registro")
-             print("1- Forma Manual")
-             print("2- Formato .CSV")
-             opcion =  input("Digite opcion: ")
-             if opcion == '1':
-                 addsong(file_path)
-             elif opcion =='2':
-                 new_path = input("Ingrese la ruta del archivo .csv que desea agregar: ")
-                 validar_y_concatenar_csv(new_path={new_path}, file_path_destino='spotify_and_youtube 2024.csv')
-               
+            print("Insertar un registro")
+            print("1- Forma Manual")
+            print("2- Formato .CSV")
+            opcion =  input("Digite opcion: ")
+            if opcion == '1':
+                find_last_index(file_path)
+                addsong(file_path)
+            elif opcion =='2':
+                new_path = input("Ingrese la ruta del archivo .csv que desea agregar: ")
+                if not new_path.endswith('.csv'):
+                    print("El archivo que ha proporcionado no es un archivo .csv")
+                    return
+                validar_y_concatenar_csv(new_path='01.csv', file_path_destino='spotify_and_youtube 2024.csv')
+                
 
         elif choice == '4':
             artista = input("Nombre del artista: ")
