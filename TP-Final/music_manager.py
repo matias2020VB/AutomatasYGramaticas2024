@@ -81,18 +81,23 @@ def list_top_songs_by_artist(songs):
 
 # Punto 3: Agregar una canción de forma manual al archivo CSV
 
-# Función para determinar el siguiente ID disponible
+# Función para determinar el siguiente Indice disponible
 def find_last_index(file_path):
     try:
         with open(file_path, mode='r', newline='', encoding='utf-8') as file:
             reader = csv.DictReader(file)
-            last_index = [int(row['Index']) for row in reader]
+            last_index = []
+            for row in reader:
+                try:
+                    last_index.append(int(row['Index']))
+                except ValueError:
+                    print(f"Valor no válido en la columna 'Index': {row['Index']}")
             if last_index:
                 return max(last_index) + 1
             else:
                 return 1
     except FileNotFoundError:
-        return 1
+                return 1
 
 def addsong(file_path):
     last_index = find_last_index(file_path)
@@ -123,7 +128,7 @@ def addsong(file_path):
         return
 
     
-    # Crear diccionario con la nueva canción
+    # Crea diccionario con la nueva canción
     new_song = {
         "Index": last_index,
         "Title": title,
@@ -167,69 +172,61 @@ def addsong(file_path):
 
 # Insercion de canciones por medio de otro archivo CSV.
 
-# Punto 3:
 def validar_y_concatenar_csv(new_path, file_path_destino):
-        def validar_datos_registro(registro):
-            #Valida los datos de un registro de canción.
-            # Validar URL de Spotify
-            if not re.match(r'^https://open.spotify.com/[a-zA-Z0-9/?=]+$', registro.get('Url_spotify', '')):
-                print(f"URL de Spotify no válida: {registro.get('Url_spotify', '')}")
-                return False
-            # Validar duración en milisegundos
-            if not re.match(r'^\d+$', registro.get('Duration_ms', '')):
-                print(f"Duración no válida: {registro.get('Duration_ms', '')}")
-                return False
-            # Validar URL de YouTube
-            if not re.match(r'^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+$', registro.get('Url_youtube', '')):
-                print(f"URL de YouTube no válida: {registro.get('Url_youtube', '')}")
-                return False
-            # Validar que la cantidad de likes no sea mayor que la de vistas
-            if int(registro.get('Likes', 0)) > int(registro.get('Views', 0)):
-                print(f"Likes no pueden ser mayores que Views: {registro.get('Likes', 0)} > {registro.get('Views', 0)}")
-                return False
-            return True  # Si todas las validaciones pasan, el registro es válido
+    
+    def validar_datos_registro(registro):
+        if not re.match(r'^https://open.spotify.com/[a-zA-Z0-9/?=]+$', registro.get('Url_spotify', '')):
+            print(f"URL de Spotify no válida: {registro.get('Url_spotify', '')}")
+            return False
+        if not re.match(r'^\d+$', registro.get('Duration_ms', '')):
+            print(f"Duración no válida: {registro.get('Duration_ms', '')}")
+            return False
+        if not re.match(r'^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+$', registro.get('Url_youtube', '')):
+            print(f"URL de YouTube no válida: {registro.get('Url_youtube', '')}")
+            return False
+        if int(registro.get('Likes', 0)) > int(registro.get('Views', 0)):
+            print(f"Likes no pueden ser mayores que Views: {registro.get('Likes', 0)} > {registro.get('Views', 0)}")
+            return False
+        return True
 
-
-        def leer_y_validar_csv(new_path):
-            
-            #Lee un archivo CSV y devuelve los registros válidos.
-            
-            registros_validos = []  # Lista para almacenar registros válidos
-            try:
-                with open(new_path, mode='r', newline='', encoding='utf-8') as file:  # Abrir archivo en modo lectura
-                    reader = csv.DictReader(file)  # Crear lector de CSV
-                    for row in reader:  # Iterar sobre cada fila del CSV
-                        if validar_datos_registro(row):  # Validar cada registro
-                            registros_validos.append(row)  # Agregar registro válido a la lista
-            except FileNotFoundError:  # Manejar error si el archivo no se encuentra
-                print(f"El archivo '{new_path}' no fue encontrado.")
-            except Exception as e:  # Manejar cualquier otro error
-                print(f"Error al leer el archivo: {e}")
-            return registros_validos  # Devolver lista de registros válidos
-
-        registros_validos = leer_y_validar_csv(new_path)  # Leer y validar registros del CSV
-        
-        if not registros_validos:  # Si no hay registros válidos
-            print("No hay registros válidos para concatenar.")
-            return
-        
+    def leer_y_validar_csv(new_path):
+        registros_validos = []
         try:
-            file_exists = False
-            with open(file_path_destino, mode='r', newline='', encoding='utf-8') as file:  # Verificar si el archivo destino existe
-                file_exists = True
-        except FileNotFoundError:  # Si el archivo no se encuentra, se marcará como no existente
-            pass
+            with open(new_path, mode='r', newline='', encoding='utf-8') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    if validar_datos_registro(row):
+                        registros_validos.append(row)
+        except FileNotFoundError:
+            print(f"El archivo '{new_path}' no fue encontrado.")
+        except Exception as e:
+            print(f"Error al leer el archivo: {e}")
+        return registros_validos
 
-        with open(file_path_destino, mode='a', newline='', encoding='utf-8') as file:  # Abrir archivo destino en modo append
-            fieldnames = ["Title", "Artist", "Album", "Url_spotify","Track", "Uri", "Duration_ms", "Url_youtube", "Likes", "Views"]
-            writer = csv.DictWriter(file, fieldnames=fieldnames)  # Crear escritor de CSV con los nombres de campo
+    registros_validos = leer_y_validar_csv(new_path)
+    if not registros_validos:
+        print("No hay registros válidos para concatenar.")
+        return
 
-            if not file_exists:  # Si el archivo no existía previamente
-                writer.writeheader()  # Escribir cabecera en el archivo
+    try:
+        file_exists = False
+        with open(file_path_destino, mode='r', newline='', encoding='utf-8') as file:
+            file_exists = True
+    except FileNotFoundError:
+        pass
 
-            writer.writerows(registros_validos)  # Escribir registros válidos en el archivo
+    last_index = find_last_index(file_path_destino)
 
-        print(f"{len(registros_validos)} registros válidos han sido concatenados exitosamente.")  # Imprimir mensaje de éxito"""
+    with open(file_path_destino, mode='a', newline='', encoding='utf-8') as file:
+        fieldnames = ["Index", "Title", "Artist", "Album", "Url_spotify", "Uri", "Duration_ms", "Url_youtube", "Likes", "Views"]
+        if not file_exists:
+            file.write(','.join(fieldnames) + '\n')  # Escribir la cabecera del archivo
+        for registro in registros_validos:
+            registro_filtrado = {campo: registro.get(campo, '') for campo in fieldnames}
+            registro_filtrado['Index'] = last_index
+            last_index += 1
+            file.write(','.join(str(registro_filtrado[campo]) for campo in fieldnames)+'\n')
+    print("Archivos concatenados correctamente.")
 
 
 # Punto 4: Mostrar información de un artista
@@ -262,4 +259,3 @@ def mostrar_informacion_artista(artista, registros):
             print(f"  Canciones: {info['canciones']}")  # Mostrar cantidad de canciones
             print(f"  Duración total: {duracion_total_minutos} minutos y {duracion_total_segundos} segundos")  # Mostrar duración total
             print("-" * 50)
-        
