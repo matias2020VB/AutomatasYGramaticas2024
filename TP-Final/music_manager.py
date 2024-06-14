@@ -1,8 +1,42 @@
 import csv  # Importar módulo para manejo de archivos CSV
 import re  # Importar módulo para expresiones regulares
 from datetime import timedelta  # Importar timedelta para manejo de duraciones
-import os
+import pathlib
+from dataclasses import dataclass
 
+#Codigo para abrir y manejar el archivo CSV
+@dataclass
+class SongsDto:
+    track: str
+    artist: str
+    album: str
+    duration_ms: int
+    views: int
+    likes: int
+    uri: str
+    url: str
+
+def parse_csv() -> list:
+    songs = []
+    try:
+        with open(f"{pathlib.Path(__file__).parent.absolute()}/spotify_and_youtube 2024.csv", 'r', encoding='utf-8') as file:
+            csv_reader = csv.DictReader(file, delimiter=',')
+            for row in csv_reader:
+                song = SongsDto(
+                    row['Track'],
+                    row['Artist'],
+                    row['Album'],
+                    row['Duration_ms'],
+                    row['Views'],
+                    row['Likes'],
+                    row['Url_spotify'],
+                    row['Url_youtube'],
+                )
+                songs.append(song)
+        return songs
+    except (FileNotFoundError):
+        print("File not found")
+        exit(1)
 
 # Punto 1: Cargar canciones desde un archivo CSV
 def load_songs(file_path):
@@ -45,8 +79,6 @@ def format_duration(ms):
         return f"{hours:02}:{minutes:02}:{seconds:02}"  # Formatear como HH:MM:SS
     except ValueError:  # Manejar error de conversión
         return "00:00:00"
-
-
 
 # Punto 2: Listar las 10 canciones más reproducidas de un artista
 def list_top_songs_by_artist(songs):
@@ -101,135 +133,193 @@ def find_last_index(file_path):
 
 def addsong(file_path):
     last_index = find_last_index(file_path)
-    title = input("Ingrese el título de la canción: ")  # Pedir título de la canción
-    artist = input("Ingrese el nombre del artista: ")  # Pedir nombre del artista
-    album = input("Ingrese el nombre del álbum: ")  # Pedir nombre del álbum
-    url_spotify = input("Ingrese la URL de Spotify de la canción: ")  # Pedir URL de Spotify
-    uri = input("Ingrese el URI de Spotify de la canción: ")  # Pedir URI de Spotify
-    duration_ms = input("Ingrese la duración en milisegundos: ")  # Pedir duración en milisegundos
-    url_youtube = input("Ingrese la URL de YouTube: ")  # Pedir URL de YouTube
-    likes = input("Ingrese la cantidad de likes: ")  # Pedir cantidad de likes
-    views = input("Ingrese la cantidad de views: ")  # Pedir cantidad de vistas
+    title = input("Ingrese el título de la canción: ")  
+    artist = input("Ingrese el nombre del artista: ")  
+    album = input("Ingrese el nombre del álbum: ")  
+    url_spotify = input("Ingrese la URL de Spotify de la canción: ")  
+    uri = input("Ingrese el URI de Spotify de la canción: ")  
+    duration_ms = input("Ingrese la duración en milisegundos: ")  
+    url_youtube = input("Ingrese la URL de YouTube: ")  
+    likes = input("Ingrese la cantidad de likes: ")  
+    views = input("Ingrese la cantidad de views: ")  
 
-    if not re.match(r'^https://open.spotify.com/[a-zA-Z0-9/?=]+$', url_spotify):  # Validar URL de Spotify
-        print("URL de Spotify no válida.")
-        return
-
-    if not re.match(r'^\d+$', duration_ms):  # Validar duración
-        print("Duración no válida.")
-        return
-
-    if not re.match(r'^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+$', url_youtube):  # Validar URL de YouTube
-        print("URL de YouTube no válida.")
-        return
+    # Funciones para validar las URL
     
-    if int(likes) > int(views):  # Validar que likes no sean mayores que vistas
-        print("El número de likes no puede ser mayor que el de views.")
-        return
-
-    
-    # Crea diccionario con la nueva canción
-    new_song = {
-        "Index": last_index,
-        "Title": title,
-        "Artist": artist,
-        "Album": album,
-        "Url_spotify": url_spotify,
-        "Uri": uri,
-        "Duration_ms": int(duration_ms),
-        "Url_youtube": url_youtube,
-        "Likes": likes,
-        "Views": views,
-        "Danceability": "0.0",
-        "Energy": "0.0",
-        "Key": "0",
-        "Loudness": "0.0",
-        "Speechiness": "0.0",
-        "Acousticness": "0.0",
-        "Instrumentalness": "0.0",
-        "Liveness": "0.0",
-        "Valence": "0.0",
-        "Tempo": "0.0",
-        "Channel": "0.0",
-        "Comments": "0.0",
-        "Licensed": "0.0",
-        "Stream": "0.0",
-        "official_video": "0.0",
+    def validate_spotify_url(url_spotify):
+        pattern = r'^https://open.spotify.com/[a-zA-Z0-9/?=]+$'
+        return re.match(pattern, url_spotify) is not None
         
+    def validate_youtube_url(url_youtube):
+        pattern = r'^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+$'
+        return re.match(pattern, url_youtube) is not None
+    
+    def validate_duration(duration_ms):
+        pattern = r'^\d+$'
+        return re.match(pattern, duration_ms) is not None
+    
+    def validate_spotify_uri(uri):
+        pattern = r'spotify:track:[a-zA-Z0-9]{22}'
+        return re.match(pattern, uri) is not None
+    
+    def validate_likes(likes, views):
+        if int(likes) > int(views):  
+            print("El número de likes no puede ser mayor que el de views.")
+            return
+
+
+    # Crea diccionario con la nueva canción
+    new_song =  {"Index": last_index, "Title": title, "Artist": artist, "Album": album, "Url_spotify": url_spotify,
+                "Uri": uri, "Duration_ms": int(duration_ms), "Url_youtube": url_youtube, "Likes": likes, "Views": views,
+                # Valores por defecto
+                "Danceability": "0.0", "Energy": "0.0", "Key": "0", "Loudness": "0.0", "Speechiness": "0.0", "Acousticness": "0.0",
+                "Instrumentalness": "0.0", "Liveness": "0.0", "Valence": "0.0", "Tempo": "0.0", "Channel": "0.0",
+                "Comments": "0.0", "Licensed": "0.0", "Stream": "0.0", "official_video": "0.0",
+                    
     }
     try:
         with open(file_path, 'a', newline='', encoding='utf-8') as file: # Abrir archivo en modo append
-            writer = csv.DictWriter(file, fieldnames=new_song.keys()) # Crear escritor de CSV
-            # Write header if the file is empty
-            file.seek(0, 2)  # Move the cursor to the end of the file
-            if file.tell() == 0:  # Check if the file is empty
+            # Creamos un escritor de CSV
+            writer = csv.DictWriter(file, fieldnames=new_song.keys()) 
+            # Escribe la cabecera si el archivo está vacío
+            # Moviendo el cursor al final del archivo y verificando si está vacío
+            # Chequeamos si el archivo esta vacio 
+            file.seek(0, 2)  
+            if file.tell() == 0:  
                 writer.writeheader()
             writer.writerow(new_song)
         print("Canción agregada correctamente.")
     except Exception as e:
         print(f"Error al agregar la canción: {e}")
 
+# Punto 3 (Continuación): Agregar una canción desde un archivo CSV
 
-# Insercion de canciones por medio de otro archivo CSV.
+def manager_csv(new_path, main_path):
+    # Funciones en las que validamos cada URL, duración, URI y likes.
+    def validate_spotify_url(url_spotify):
+        pattern = r'^https://open.spotify.com/[a-zA-Z0-9/?=]+$'
+        return re.match(pattern, url_spotify) is not None
 
-def validar_y_concatenar_csv(new_path, file_path_destino):
-    
-    def validar_datos_registro(registro):
-        if not re.match(r'^https://open.spotify.com/[a-zA-Z0-9/?=]+$', registro.get('Url_spotify', '')):
-            print(f"URL de Spotify no válida: {registro.get('Url_spotify', '')}")
-            return False
-        if not re.match(r'^\d+$', registro.get('Duration_ms', '')):
-            print(f"Duración no válida: {registro.get('Duration_ms', '')}")
-            return False
-        if not re.match(r'^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+$', registro.get('Url_youtube', '')):
-            print(f"URL de YouTube no válida: {registro.get('Url_youtube', '')}")
-            return False
-        if int(registro.get('Likes', 0)) > int(registro.get('Views', 0)):
-            print(f"Likes no pueden ser mayores que Views: {registro.get('Likes', 0)} > {registro.get('Views', 0)}")
-            return False
-        return True
+    def validate_youtube_url(url_youtube):
+        pattern = r'^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+$'
+        return re.match(pattern, url_youtube) is not None
 
-    def leer_y_validar_csv(new_path):
-        registros_validos = []
+    def validate_duration(duration_ms):
+        pattern = r'^\d+$'
+        return re.match(pattern, duration_ms) is not None
+
+    def validate_spotify_uri(uri):
+        pattern = r'spotify:track:[a-zA-Z0-9]{22}'
+        return re.match(pattern, uri) is not None
+
+    def validate_likes(likes, views):
         try:
-            with open(new_path, mode='r', newline='', encoding='utf-8') as file:
+            likes = int(likes)
+            return likes <= int(views)
+        except ValueError:
+            return False
+
+    # Encontrar el último índice
+    def find_last_index(path):
+        try:
+            with open(path, 'r', newline='', encoding='utf-8') as file:
                 reader = csv.DictReader(file)
-                for row in reader:
-                    if validar_datos_registro(row):
-                        registros_validos.append(row)
+                rows = list(reader)
+                if rows:
+                    return int(rows[-1]['Index'])
+                else:
+                    return -1
         except FileNotFoundError:
-            print(f"El archivo '{new_path}' no fue encontrado.")
-        except Exception as e:
-            print(f"Error al leer el archivo: {e}")
-        return registros_validos
+            return -1
 
-    registros_validos = leer_y_validar_csv(new_path)
-    if not registros_validos:
-        print("No hay registros válidos para concatenar.")
-        return
+    # Leemos el archivo .csv
+    with open(new_path, mode='r', newline='', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        fieldnames = reader.fieldnames
 
-    try:
-        file_exists = False
-        with open(file_path_destino, mode='r', newline='', encoding='utf-8') as file:
-            file_exists = True
-    except FileNotFoundError:
-        pass
+        # Verificamos que las columnas solicitadas estén dentro del archivo subido.
+        requested_columns = ['Artist','Url_spotify', 'Track', 'Album', 'Uri', 'Duration_ms',
+                            'Url_youtube', 'Views', 'Likes']
 
-    last_index = find_last_index(file_path_destino)
+        for column in requested_columns:
+            if column not in fieldnames:
+                print(f"La columna '{column}' no se ha encontrado en el archivo subido.")
+                return
 
-    with open(file_path_destino, mode='a', newline='', encoding='utf-8') as file:
-        fieldnames = ["Index", "Title", "Artist", "Album", "Url_spotify", "Uri", "Duration_ms", "Url_youtube", "Likes", "Views"]
-        if not file_exists:
-            file.write(','.join(fieldnames) + '\n')  # Escribir la cabecera del archivo
-        for registro in registros_validos:
-            registro_filtrado = {campo: registro.get(campo, '') for campo in fieldnames}
-            registro_filtrado['Index'] = last_index
-            last_index += 1
-            file.write(','.join(str(registro_filtrado[campo]) for campo in fieldnames)+'\n')
-    print("Archivos concatenados correctamente.")
+        # Validación de datos del archivo subido
+        for row in reader:
+            last_index = find_last_index(main_path) + 1
+            new_song = [last_index]
 
+            artist = row['Artist']
+            new_song.append(artist)
 
+            track = row['Track']
+            new_song.append(track)
+
+            album = row['Album']
+            new_song.append(album)
+
+            # Validación para la URL de Spotify
+            url_spotify = row['Url_spotify']
+            if not validate_spotify_url(url_spotify):
+                print(f"URL de Spotify no válida: {url_spotify}")
+                continue
+            new_song.append(url_spotify)
+
+            # Validación para la URI de Spotify
+            uri = row['Uri']
+            if not validate_spotify_uri(uri):
+                print(f"URI de Spotify no válida: {uri}")
+                continue
+            new_song.append(uri)
+
+            # Validación para la duración de la canción.
+            duration_ms = row['Duration_ms']
+            if not validate_duration(duration_ms):
+                print(f"Duración no válida: {duration_ms}")
+                continue
+            new_song.append(duration_ms)
+
+            # Añadir valores por defecto para campos adicionales
+            defaults = {
+                "Danceability": "0.0", "Energy": "0.0", "Key": "0", "Loudness": "0.0",
+                "Speechiness": "0.0", "Acousticness": "0.0", "Instrumentalness": "0.0",
+                "Liveness": "0.0", "Valence": "0.0", "Tempo": "0.0", "Channel": "0.0",
+                "Comments": "0.0", "Licensed": "0.0", "Stream": "0.0", "official_video": "0.0",
+            }
+            new_song.extend(defaults.values())
+
+            # Validación para la URL de YouTube
+            url_youtube = row['Url_youtube']
+            if not validate_youtube_url(url_youtube):
+                print(f"URL de YouTube no válida: {url_youtube}")
+                continue
+            new_song.append(url_youtube)
+
+            # Comprobación de que los likes no sean mayores que las vistas
+            likes = row['Likes']
+            views = row['Views']
+            if not validate_likes(likes, views):
+                print(f"Likes no pueden ser mayores que Views: {likes} > {views}")
+                continue
+            new_song.append(likes)
+            new_song.append(views)
+
+            # Inserción de la nueva canción en el archivo
+            with open(main_path, 'a', newline='', encoding='utf-8') as music_file:
+                music_writer = csv.writer(music_file)
+                if last_index == 0:
+                    headers = ["Index", "Artist", "Url_spotify", "Track", "Album","Uri", "Danceability", "Energy",
+                                "Key", "Loudness","Speechiness","Acousticness","Instrumentalness","Liveness","Valence",
+                                "Tempo","Duration_ms", "Url_youtube", "Title", "Channel", "Views", "Likes", "Comments", 
+                                "Licensed", "official_video", "Stream"]
+                    music_writer.writerow(headers)
+                music_writer.writerow(new_song)
+            print("Canciones agregadas con éxito!")
+            
+                
 # Punto 4: Mostrar información de un artista
+
 def mostrar_informacion_artista(artista, registros):
         """Muestra la cantidad de álbumes, nombres de álbumes, cantidad de canciones y duración total por álbum de un artista."""
         albums = {}  # Diccionario para almacenar información de los álbumes
