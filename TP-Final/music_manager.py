@@ -237,8 +237,8 @@ def manager_csv(new_path, main_path):
         fieldnames = reader.fieldnames
 
         # Verificamos que las columnas solicitadas estén dentro del archivo subido.
-        requested_columns = ['Artist','Url_spotify', 'Track', 'Album', 'Uri', 'Duration_ms',
-                            'Url_youtube', 'Views', 'Likes']
+        requested_columns = ['Artist', 'Url_spotify', 'Track', 'Album', 'Uri', 'Duration_ms',
+                             'Url_youtube', 'Views', 'Likes']
 
         for column in requested_columns:
             if column not in fieldnames:
@@ -248,74 +248,69 @@ def manager_csv(new_path, main_path):
         # Validación de datos del archivo subido
         for row in reader:
             last_index = find_last_index(main_path) + 1
-            new_song = [last_index]
-
-            artist = row['Artist']
-            new_song.append(artist)
-
-            track = row['Track']
-            new_song.append(track)
-
-            album = row['Album']
-            new_song.append(album)
-
-            # Validación para la URL de Spotify
-            url_spotify = row['Url_spotify']
-            if not validate_spotify_url(url_spotify):
-                print(f"URL de Spotify no válida: {url_spotify}")
-                continue
-            new_song.append(url_spotify)
-
-            # Validación para la URI de Spotify
-            uri = row['Uri']
-            if not validate_spotify_uri(uri):
-                print(f"URI de Spotify no válida: {uri}")
-                continue
-            new_song.append(uri)
-
-            # Validación para la duración de la canción.
-            duration_ms = row['Duration_ms']
-            if not validate_duration(duration_ms):
-                print(f"Duración no válida: {duration_ms}")
-                continue
-            new_song.append(duration_ms)
-
-            # Añadir valores por defecto para campos adicionales
-            defaults = {
-                "Danceability": "0.0", "Energy": "0.0", "Key": "0", "Loudness": "0.0",
-                "Speechiness": "0.0", "Acousticness": "0.0", "Instrumentalness": "0.0",
-                "Liveness": "0.0", "Valence": "0.0", "Tempo": "0.0", "Channel": "0.0",
-                "Comments": "0.0", "Licensed": "0.0", "Stream": "0.0", "official_video": "0.0",
+            new_song = {
+                "Index": last_index,
+                "Artist": row['Artist'],
+                "Url_spotify": row['Url_spotify'],
+                "Track": row['Track'],
+                "Album": row['Album'],
+                "Uri": row['Uri'],
+                "Duration_ms": row['Duration_ms'],
+                "Url_youtube": row['Url_youtube'],
+                "Views": row['Views'],
+                "Likes": row['Likes'],
+                "Danceability": "0.0",
+                "Energy": "0.0",
+                "Key": "0",
+                "Loudness": "0.0",
+                "Speechiness": "0.0",
+                "Acousticness": "0.0",
+                "Instrumentalness": "0.0",
+                "Liveness": "0.0",
+                "Valence": "0.0",
+                "Tempo": "0.0",
+                "Channel": "0.0",
+                "Comments": "0.0",
+                "Licensed": "0.0",
+                "Stream": "0.0",
+                "official_video": "0.0",
             }
-            new_song.extend(defaults.values())
 
-            # Validación para la URL de YouTube
-            url_youtube = row['Url_youtube']
-            if not validate_youtube_url(url_youtube):
-                print(f"URL de YouTube no válida: {url_youtube}")
+            # Validar URL de Spotify
+            if not validate_spotify_url(new_song["Url_spotify"]):
+                print(f"URL de Spotify no válida: {new_song['Url_spotify']}")
                 continue
-            new_song.append(url_youtube)
 
-            # Comprobación de que los likes no sean mayores que las vistas
-            likes = row['Likes']
-            views = row['Views']
-            if not validate_likes(likes, views):
-                print(f"Likes no pueden ser mayores que Views: {likes} > {views}")
+            # Validar URI de Spotify
+            if not validate_spotify_uri(new_song["Uri"]):
+                print(f"URI de Spotify no válida: {new_song['Uri']}")
                 continue
-            new_song.append(likes)
-            new_song.append(views)
+
+            # Validar duración
+            if not validate_duration(new_song["Duration_ms"]):
+                print(f"Duración no válida: {new_song['Duration_ms']}")
+                continue
+
+            # Validar URL de YouTube
+            if not validate_youtube_url(new_song["Url_youtube"]):
+                print(f"URL de YouTube no válida: {new_song['Url_youtube']}")
+                continue
+
+            # Validar likes y views
+            if not validate_likes(new_song["Likes"], new_song["Views"]):
+                print(f"Likes no pueden ser mayores que Views: {new_song['Likes']} > {new_song['Views']}")
+                continue
 
             # Inserción de la nueva canción en el archivo
             with open(main_path, 'a', newline='', encoding='utf-8') as music_file:
-                music_writer = csv.writer(music_file)
-                if last_index == 0:
-                    headers = ["Index", "Artist", "Url_spotify", "Track", "Album","Uri", "Danceability", "Energy",
-                                "Key", "Loudness","Speechiness","Acousticness","Instrumentalness","Liveness","Valence",
-                                "Tempo","Duration_ms", "Url_youtube", "Title", "Channel", "Views", "Likes", "Comments", 
-                                "Licensed", "official_video", "Stream"]
-                    music_writer.writerow(headers)
+                music_writer = csv.DictWriter(music_file, fieldnames=new_song.keys())
+                # Escribe la cabecera si el archivo está vacío
+                music_file.seek(0, 2)
+                if music_file.tell() == 0:
+                    music_writer.writeheader()
                 music_writer.writerow(new_song)
             print("Canciones agregadas con éxito!")
+
             
                 
 # Punto 4: Mostrar información de un artista
