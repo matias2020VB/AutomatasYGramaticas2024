@@ -194,7 +194,7 @@ def addsong(file_path):
 # Punto 3 (Continuación): Agregar una canción desde un archivo CSV
 
 def manager_csv(new_path, main_path):
-    # Funciones en las que validamos cada URL, duración, URI y likes.
+    # Funciones de validación
     def validate_spotify_url(url_spotify):
         pattern = r'^https://open.spotify.com/[a-zA-Z0-9/?=]+$'
         return re.match(pattern, url_spotify) is not None
@@ -218,7 +218,6 @@ def manager_csv(new_path, main_path):
         except ValueError:
             return False
 
-    # Encontrar el último índice
     def find_last_index(path):
         try:
             with open(path, 'r', newline='', encoding='utf-8') as file:
@@ -231,12 +230,12 @@ def manager_csv(new_path, main_path):
         except FileNotFoundError:
             return -1
 
-    # Leemos el archivo .csv
+    # Leer el archivo .csv nuevo
     with open(new_path, mode='r', newline='', encoding='utf-8') as file:
         reader = csv.DictReader(file)
         fieldnames = reader.fieldnames
 
-        # Verificamos que las columnas solicitadas estén dentro del archivo subido.
+        # Verificar que las columnas solicitadas estén dentro del archivo subido
         requested_columns = ['Artist', 'Url_spotify', 'Track', 'Album', 'Uri', 'Duration_ms',
                              'Url_youtube', 'Views', 'Likes']
 
@@ -254,11 +253,8 @@ def manager_csv(new_path, main_path):
                 "Url_spotify": row['Url_spotify'],
                 "Track": row['Track'],
                 "Album": row['Album'],
+                "Album_type": "0",  # Puedes agregar un valor predeterminado aquí
                 "Uri": row['Uri'],
-                "Duration_ms": row['Duration_ms'],
-                "Url_youtube": row['Url_youtube'],
-                "Views": row['Views'],
-                "Likes": row['Likes'],
                 "Danceability": "0.0",
                 "Energy": "0.0",
                 "Key": "0",
@@ -269,11 +265,16 @@ def manager_csv(new_path, main_path):
                 "Liveness": "0.0",
                 "Valence": "0.0",
                 "Tempo": "0.0",
-                "Channel": "0.0",
+                "Duration_ms": row['Duration_ms'],
+                "Url_youtube": row['Url_youtube'],
+                "Title": "0",  # Puedes agregar un valor predeterminado aquí
+                "Channel": "0",  # Puedes agregar un valor predeterminado aquí
+                "Views": row['Views'],
+                "Likes": row['Likes'],
                 "Comments": "0.0",
                 "Licensed": "0.0",
-                "Stream": "0.0",
                 "official_video": "0.0",
+                "Stream": "0.0",
             }
 
             # Validar URL de Spotify
@@ -301,7 +302,7 @@ def manager_csv(new_path, main_path):
                 print(f"Likes no pueden ser mayores que Views: {new_song['Likes']} > {new_song['Views']}")
                 continue
 
-            # Inserción de la nueva canción en el archivo
+            # Inserción de la nueva canción en el archivo principal
             with open(main_path, 'a', newline='', encoding='utf-8') as music_file:
                 music_writer = csv.DictWriter(music_file, fieldnames=new_song.keys())
                 # Escribe la cabecera si el archivo está vacío
